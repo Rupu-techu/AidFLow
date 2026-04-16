@@ -1,5 +1,6 @@
-from google import genai
 import os
+import time
+from google import genai
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -54,19 +55,34 @@ def get_mock_response(prompt: str) -> str:
         }'''
     return "{}"
 
-def generate_response(prompt: str):
+def generate_response(prompt: str, retries: int = 3, delay: int = 1):
+    """
+    Generates a response from Gemini API with a reliability layer.
+    If MOCK_API=True, uses mock data.
+    If MOCK_API=False, tries Gemini API with retries and falls back to mock data on failure.
+    """
     if os.getenv("MOCK_API", "False").lower() in ("true", "1", "yes"):
         print("[MOCK_API=True] Using simulated response...")
         return get_mock_response(prompt)
 
-    try:
-        response = client.models.generate_content(
+    attempt = 0
+    while attempt < retries:
+        try:
+            response = client.models.generate_content(
             model="gemini-2.5-flash", 
-            contents=prompt
-        )
+                contents=prompt
+            )
+            if response and response.text:
+                return response.text
+            
+            print(f"[Gemini Warning] Empty response on attempt {attempt + 1}. Retrying...")
+            
+        except Exception as e:
+            print(f"[Gemini Error] Attempt {attempt + 1} failed: {e}")
+            
+        attempt += 1
+        if attempt < retries:
+            time.sleep(delay)
 
-        return response.text
-
-    except Exception as e:
-        print("Gemini Error:", e)
-        return "{}"
+    print("[Reliability Layer] All Gemini retries failed. Falling back to Mock API.")
+    return get_mock_response(prompt)
