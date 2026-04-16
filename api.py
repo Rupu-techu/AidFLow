@@ -67,6 +67,10 @@ async def process_situation(request: ProcessRequest):
 async def health_check():
     return {"status": "healthy", "mock_api": os.getenv("MOCK_API", "False")}
 
+@app.get("/")
+def root():
+    return {"status": "API running"}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
