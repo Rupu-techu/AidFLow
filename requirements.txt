@@ -2,3 +2,5 @@ openai>=1.0.0
 python-dotenv
 google-generativeai
 google-genai
+fastapi
+uvicorn

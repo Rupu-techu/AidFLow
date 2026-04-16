@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import os
 import json
@@ -21,8 +22,26 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 class ProcessRequest(BaseModel):
     text: str
+
+@app.get("/")
+async def root():
+    """Root endpoint for status verification."""
+    return {
+        "status": "online",
+        "service": "AidFlow Agentic Pipeline",
+        "mock_mode": os.getenv("MOCK_API", "False").lower() in ("true", "1", "yes")
+    }
 
 @app.post("/process")
 async def process_situation(request: ProcessRequest):
@@ -57,20 +76,24 @@ async def process_situation(request: ProcessRequest):
         final_results = ControllerAgent().process(state_manager.get_context())
         state_manager.update(final_results)
 
-        # Return final state
+        # Return final state (Always valid JSON)
         return state_manager.state
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Pipeline Error: {str(e)}")
+        print(f"[API Error]: {e}")
+        return {
+            "error": "Pipeline Failure",
+            "detail": str(e),
+            "partial_state": state_manager.state
+        }
 
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "mock_api": os.getenv("MOCK_API", "False")}
 
-@app.get("/")
-def root():
-    return {"status": "API running"}
-
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    import os
+    # Use environment variable for PORT, fallback to 8080 for Cloud Run standard
+    port = int(os.environ.get("PORT", 8080))
+    uvicorn.run(app, host="0.0.0.0", port=port)
