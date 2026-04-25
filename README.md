@@ -1,6 +1,6 @@
 # AidFlow: Agentic Volunteer Intelligence System
 
-AidFlow is a robust Multi-Agent AI pipeline designed to transform unstructured disaster/emergency reports into actionable response plans. By leveraging the **Gemini 2.5 Flash** model, the system autonomously analyzes severity, prioritizes needs, and allocates volunteer resources with realistic NGO mapping.
+AidFlow is a robust Multi-Agent AI pipeline designed to transform unstructured disaster/emergency reports into actionable response plans. By leveraging the **Gemini Flash** model family, the system autonomously analyzes severity, prioritizes needs, and allocates volunteer resources with realistic NGO mapping.
 
 ---
 
@@ -48,6 +48,7 @@ The system uses a sequential orchestration of five specialized agents to ensure 
    Create a `.env` file in the root:
    ```env
    GOOGLE_API_KEY=your_gemini_key_here
+   GEMINI_MODEL=gemini-2.5-flash
    MOCK_API=False
    ```
 

@@ -1,11 +1,26 @@
 import os
 import time
 from google import genai
+from google.genai import types
 from dotenv import load_dotenv
 
 load_dotenv()
 
-client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+# Gemini's API rejects manually-set deadlines below 10 seconds.
+GEMINI_TIMEOUT_MS = max(int(os.getenv("GEMINI_TIMEOUT_MS", "10000")), 10000)
+GEMINI_RETRIES = int(os.getenv("GEMINI_RETRIES", "1"))
+GEMINI_RETRY_DELAY_SECONDS = float(os.getenv("GEMINI_RETRY_DELAY_SECONDS", "0.5"))
+
+client = (
+    genai.Client(
+        api_key=GOOGLE_API_KEY,
+        http_options=types.HttpOptions(timeout=GEMINI_TIMEOUT_MS),
+    )
+    if GOOGLE_API_KEY
+    else None
+)
 
 def get_mock_response(prompt: str) -> str:
     """Returns static JSON responses for dry-run testing."""
@@ -55,21 +70,31 @@ def get_mock_response(prompt: str) -> str:
         }'''
     return "{}"
 
-def generate_response(prompt: str, retries: int = 3, delay: int = 1):
+def generate_response(
+    prompt: str,
+    retries: int = GEMINI_RETRIES,
+    delay: float = GEMINI_RETRY_DELAY_SECONDS,
+):
     """
     Generates a response from Gemini API with a reliability layer.
     If MOCK_API=True, uses mock data.
     If MOCK_API=False, tries Gemini API with retries and falls back to mock data on failure.
     """
-    if os.getenv("MOCK_API", "False").lower() in ("true", "1", "yes"):
+    mock_enabled = os.getenv("MOCK_API", "False").lower() in ("true", "1", "yes")
+
+    if mock_enabled:
         print("[MOCK_API=True] Using simulated response...")
+        return get_mock_response(prompt)
+
+    if not client:
+        print("[GOOGLE_API_KEY missing] Using simulated response...")
         return get_mock_response(prompt)
 
     attempt = 0
     while attempt < retries:
         try:
             response = client.models.generate_content(
-            model="gemini-2.5-flash", 
+                model=GEMINI_MODEL,
                 contents=prompt
             )
             if response and response.text:
@@ -86,3 +111,4 @@ def generate_response(prompt: str, retries: int = 3, delay: int = 1):
 
     print("[Reliability Layer] All Gemini retries failed. Falling back to Mock API.")
     return get_mock_response(prompt)
+

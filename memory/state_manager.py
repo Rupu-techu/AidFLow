@@ -16,6 +16,11 @@ class StateManager:
             "volunteer_plan": [],
             "resource_distribution": {},
             "reasoning_summary": "",
+            "agent_message": "",
+            "situation_brief": {},
+            "immediate_actions": [],
+            "counter_questions": [],
+            "follow_up_questions": [],
             "confidence": 0.0
         }
 

@@ -1,69 +1,140 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-/* 🌌 Global Background */
-body {
-  @apply bg-black text-white;
-  background: radial-gradient(circle at 20% 20%, #1a1a2e, #000000);
-  font-family: 'Inter', sans-serif;
+:root {
+  color-scheme: dark;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #05020d;
+  color: #f8fafc;
 }
 
-/* ✨ Smooth transitions */
 * {
-  @apply transition-all duration-300 ease-in-out;
+  box-sizing: border-box;
 }
 
-/* 💎 Glass effect */
-.glass {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+html {
+  min-height: 100%;
+  scroll-behavior: smooth;
+  background: #05020d;
 }
 
-/* 🔥 Glow effects */
-.glow {
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at 15% 10%, rgba(236, 72, 153, 0.18), transparent 32%),
+    radial-gradient(circle at 88% 12%, rgba(59, 130, 246, 0.16), transparent 34%),
+    linear-gradient(135deg, #05020d 0%, #090419 48%, #020617 100%);
+  color: #f8fafc;
+  text-rendering: geometricPrecision;
 }
 
-.glow-red {
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+body::before {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  background-image: linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 80px 80px;
+  mask-image: radial-gradient(circle at center, black, transparent 72%);
+  opacity: 0.22;
 }
 
-/* 🎯 Premium button */
-.btn-primary {
-  @apply px-6 py-3 rounded-xl font-semibold text-white;
-  background: linear-gradient(135deg, #3b82f6, #9333ea);
+#root {
+  min-height: 100vh;
 }
 
-.btn-primary:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 20px rgba(147, 51, 234, 0.5);
+button,
+input,
+textarea,
+select {
+  font: inherit;
 }
 
-/* 🧠 Input styling */
-textarea {
-  @apply rounded-xl p-4 bg-black/40 border border-white/10;
+a {
+  color: inherit;
+  text-decoration: none;
 }
 
-textarea:focus {
-  outline: none;
-  border-color: #9333ea;
-  box-shadow: 0 0 15px rgba(147, 51, 234, 0.4);
+::selection {
+  background: rgba(236, 72, 153, 0.38);
+  color: #ffffff;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.55), rgba(34, 211, 238, 0.5));
+  border-radius: 999px;
+}
+
+.animate-mesh {
+  animation: meshShift 18s ease-in-out infinite alternate;
+}
+
+.animate-float-slow {
+  animation: floatSlow 6s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2.8s ease-in-out infinite;
+}
+
+@keyframes meshShift {
+  0% {
+    transform: translate3d(-2%, -1%, 0) scale(1);
   }
 
-  to {
-    opacity: 1;
+  50% {
+    transform: translate3d(2%, 1%, 0) scale(1.04);
+  }
+
+  100% {
+    transform: translate3d(1%, -2%, 0) scale(1.02);
+  }
+}
+
+@keyframes floatSlow {
+  0%,
+  100% {
     transform: translateY(0);
   }
+
+  50% {
+    transform: translateY(-14px);
+  }
 }
 
-.animate-fadeIn {
-  animation: fadeIn 0.6s ease-out;
+@keyframes pulseGlow {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 34px rgba(34, 211, 238, 0.24), 0 0 58px rgba(168, 85, 247, 0.22);
+  }
+
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 48px rgba(34, 211, 238, 0.38), 0 0 86px rgba(236, 72, 153, 0.26);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
