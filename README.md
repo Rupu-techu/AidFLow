@@ -48,7 +48,7 @@ The system uses a sequential orchestration of five specialized agents to ensure 
    Create a `.env` file in the root:
    ```env
    GOOGLE_API_KEY=your_gemini_key_here
-   GEMINI_MODEL=gemini-2.5-flash
+   GEMINI_MODEL=give_gemini_model_of_your_choise
    MOCK_API=False
    ```
 
