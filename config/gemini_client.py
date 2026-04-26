@@ -7,10 +7,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+
 # Gemini's API rejects manually-set deadlines below 10 seconds.
 GEMINI_TIMEOUT_MS = max(int(os.getenv("GEMINI_TIMEOUT_MS", "10000")), 10000)
-GEMINI_RETRIES = int(os.getenv("GEMINI_RETRIES", "1"))
+
+GEMINI_RETRIES = int(os.getenv("GEMINI_RETRIES", "3"))
 GEMINI_RETRY_DELAY_SECONDS = float(os.getenv("GEMINI_RETRY_DELAY_SECONDS", "0.5"))
 
 client = (
@@ -108,7 +110,18 @@ def generate_response(
         attempt += 1
         if attempt < retries:
             time.sleep(delay)
+            
+        print("[Reliability Layer] Switching to fallback model...")
 
-    print("[Reliability Layer] All Gemini retries failed. Falling back to Mock API.")
-    return get_mock_response(prompt)
+        try:
+            response = client.models.generate_content(
+            model="gemini-2.0-flash-lite",
+            contents=prompt
+            )
+            if response and response.text:
+                return response.text
+        except Exception as e:
+            print("[Fallback Model Failed]", e)
 
+        print("[Final Fallback] Using Mock API.")
+        return get_mock_response(prompt)
